@@ -1,13 +1,13 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
 import { getData, serverurl } from "../services/fetchNodeServices";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { use, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 const { width, height } = Dimensions.get("window");
-const ProductCart = ({ item, multiple=false }) => {
+const ProductCart = ({ item, multiple=false, screen , setRefresh}) => {
     const [liked, setLiked] = useState(false);
     const [productDeatils, setProductDetails] = useState([]);
-
+    
     const navigation = useNavigation()
 
     const fetchProductDetails = async () => {   
@@ -31,7 +31,10 @@ const ProductCart = ({ item, multiple=false }) => {
     };
 
     return ( 
-        <TouchableOpacity style={styles.container} onPress={() => navigation.navigate('productdetails', {productData: productDeatils})}>
+        <TouchableOpacity style={styles.container} onPress={() => {
+            navigation.navigate('productdetails', {productData: productDeatils})
+           screen == 'productDetailPage' && setRefresh(prev => !prev)
+        }}>
             {/* Like Icon */}
             <TouchableOpacity onPress={toggleLike} style={styles.likeButton}>
                 <Icon name={liked ? "favorite" : "favorite-border"} size={20} color={liked ? "red" : "gray"} />

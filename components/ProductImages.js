@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image, Text, View, Dimensions, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 import { serverurl } from "../services/fetchNodeServices";
 const {width, height} = Dimensions.get('window')
@@ -25,6 +25,10 @@ export default function ProductImages({images=[]}){
                 }} /> </TouchableOpacity>}
         />
     }
+
+    useEffect(() => {
+        setPicture(images[0])
+    }, images)
 
     return (
       <View style={{ alignItems:'center', height:height*.6}}>

@@ -1,14 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import { useDispatch } from "react-redux";
-import { addToCart, removeFromCart, decreaseQuantity } from "../storage/slice/product";
+import { addProduct, removeProduct } from "../storage/slice/product";
 import { serverurl } from "../services/fetchNodeServices";
 const { width, height } = Dimensions.get("window");
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-const CartProductComponent = ({ data }) => {
+
+const CartProductComponent = ({ data , setRefresh}) => {
     const dispatch = useDispatch();
-    const images = data?.item?.picture ? data?.item?.picture?.split(",") : [];
+    const images = data?.picture ? data?.picture?.split(",") : [];
+    const [qty, setQty] = useState(data?.qty || 0)
+
+
+    const increaseQuantity = () => {
+        let v = qty + 1;
+        setQty(v);
+        const updatedItem = { ...data, qty: v };
+        dispatch(addProduct([data?.productid, updatedItem]));
+        setRefresh(prev => !prev)
+    };
+
+    const decreaseQuantity = () => {
+        if (qty > 1) {
+            let v = qty - 1;
+            setQty(v);
+            const updatedItem = { ...data, qty: v };
+            dispatch(addProduct([data?.productid, updatedItem]));
+        } else {
+            setQty(0);
+            dispatch(removeProduct(data?.productid));
+        }
+        setRefresh(prev => !prev)
+    };
 
     return (
         <View style={styles.container}>
@@ -17,16 +41,16 @@ const CartProductComponent = ({ data }) => {
 
             <View style={styles.details}>
                 {/* Product Name */}
-                <Text numberOfLines={2} style={styles.productName}>{data?.item?.productname} {data?.item?.modelno} {data?.item?.color}</Text>
-                <Text>{data?.item?.brandname}</Text>
+                <Text numberOfLines={2} style={styles.productName}>{data?.productname} {data?.modelno} {data?.color}</Text>
+                <Text>{data?.brandname}</Text>
                 {/* Price */}
                 <Text style={styles.price}>
-                    ₹{data?.item?.offerprice} <Text style={styles.oldPrice}>₹{data?.item?.price}</Text>
+                    ₹{data?.offerprice} <Text style={styles.oldPrice}>₹{data?.price}</Text>
                 </Text>
 
                 {/* Stock Status */}
-                <Text style={[styles.stock, data?.item?.stock > 0 ? styles.inStock : styles.outOfStock]}>
-                    {data?.item?.stock > 0 ? "In Stock" : "Out of Stock"}
+                <Text style={[styles.stock, data?.stock > 0 ? styles.inStock : styles.outOfStock]}>
+                    {data?.stock > 0 ? "In Stock" : "Out of Stock"}
                 </Text>
 
                 <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
@@ -34,18 +58,18 @@ const CartProductComponent = ({ data }) => {
                 <View style={styles.quantityContainer}>
                     <TouchableOpacity 
                         style={{...styles.button, borderColor:'grey'}} 
-                        onPress={() => dispatch(decreaseQuantity(data?.item?.productid))}
-                        disabled={data?.item?.qty <= 1}
+                        onPress={() => decreaseQuantity()}
+                        disabled={data?.qty <= 1}
                     >
                         <Text style={styles.buttonText}>-</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.quantity}>{data?.item?.qty || 1}</Text>
+                    <Text style={styles.quantity}>{data?.qty || 1}</Text>
 
                    
                     <TouchableOpacity 
                         style={{...styles.button, borderColor:'#0984e3'}} 
-                        onPress={() => dispatch(addToCart(data?.item))}
+                        onPress={() => increaseQuantity()}
                     >
                         <Text style={styles.buttonText}>+</Text>
                     </TouchableOpacity>
@@ -54,7 +78,7 @@ const CartProductComponent = ({ data }) => {
                       {/* Remove Button */}
                 <TouchableOpacity 
                     style={styles.removeButton} 
-                    onPress={() => dispatch(removeFromCart(data?.item?.productid))}
+                    onPress={() => dispatch(removeProduct(data?.productid))}
                 >
                     <Icon size={20} name="delete" />
                 </TouchableOpacity>
@@ -71,7 +95,7 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         backgroundColor: "#fff",
-        marginVertical: 10,
+        marginVertical: 5,
         padding: 10,
         width:width*.97,
         borderRadius:5

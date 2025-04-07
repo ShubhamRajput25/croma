@@ -4,14 +4,7 @@ import Icon from "react-native-vector-icons/AntDesign";
 import PIcon from "react-native-vector-icons/Entypo";
 const { width, height } = Dimensions.get('window')
 
-// const style = StyleSheet.create({
-
-//     container:{
-
-//     }
-// })
-
-const TextBox = ({W=.9, msg="", type="text", icon, error=false, helperText='', password=false, h=.04, myStyle={}}) => {
+const TextBox = ({W=.9, msg="", type="text", icon, error=false, helperText='', password=false, h=.04, myStyle={}, value, setValue = () => {}, setError = () => {}, onSubmit = () => {}}) => {
     const [isFocused, setIsFocused] = useState(false);
     const [passwordIcon, setPasswordIcon] = useState('eye-with-line');
     const [isPassword, setIsPassword] = useState(password)
@@ -28,7 +21,10 @@ const TextBox = ({W=.9, msg="", type="text", icon, error=false, helperText='', p
     return <View>
         <View style={{width: width*W, borderWidth:1, borderColor:isFocused?'green':error?'#ff4757':'grey', paddingLeft:2, paddingRight:2, flexDirection:'row', alignItems:'center', backgroundColor:'#fff', borderRadius:5, height:height*h, ...myStyle}}>
         <Icon name={icon} size={20} style={{marginLeft:5}} />
-        <TextInput onFocus={()=>setIsFocused(true)} onBlur={()=>setIsFocused(false)} secureTextEntry={isPassword}  keyboardType={type} placeholder={msg} style={{fontSize:h<=.04?14:18, textAlign:'left', padding:0, width:'100%'}}  />
+        <TextInput onFocus={()=>setIsFocused(true)} onBlur={()=>setIsFocused(false)} secureTextEntry={isPassword}  keyboardType={type} placeholder={msg} style={{fontSize:h<=.05?14:18, textAlign:'left', padding:0, width:'100%'}} value={value} onChangeText={(v) => {
+            setValue(v)
+            setError(false)
+        }} onSubmitEditing={onSubmit} />
         {type=='password' && <PIcon name={passwordIcon} size={23} style={{marginLeft:'auto'}} onPress={handleClickEye} />}
         </View>
         {error && <Text style={{color:'#ff4757'}}>{helperText}</Text>}

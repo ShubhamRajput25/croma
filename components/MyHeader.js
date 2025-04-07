@@ -3,12 +3,14 @@ import Icon from "react-native-vector-icons/AntDesign"
 import TextBox from "./ui/TextBox";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { serverurl } from "../services/fetchNodeServices";
+import { useState } from "react";
 
 
 const {width, height} = Dimensions.get('window')
 
 export default function MyHeader({screen='home'}){
   const navigation = useNavigation()
+  const [searchString, setSearchString] = useState('')
 
     return (<View style={{marginTop: height*.06,alignItems:'center'}}>
       <View style={{ 
@@ -30,7 +32,9 @@ export default function MyHeader({screen='home'}){
         alignItems:'center',
         paddingBottom:5
       }}>   
-        <TextBox W={.95} h={.04} msg=" Search..." icon="search1" myStyle={{borderRadius:20}} /> 
+        <TextBox W={.95} h={.04} msg=" Search..." icon="search1" myStyle={{borderRadius:20}} value={searchString} setValue={setSearchString} onSubmit={() => {
+          navigation?.navigate('searchedproducts', {searchString: searchString})
+        }} /> 
       </View> }
       </View>
     )

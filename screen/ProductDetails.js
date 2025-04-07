@@ -10,16 +10,17 @@ import RecommendedProducts from "../components/RecommendedProducts.js";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AddToCartButton from "../components/AddToCartButton.js";
 import { useSelector } from "react-redux";
+import { primaryColor } from "../constants.js";
 
 export default function ProductDetails({route, navigation}){
-  const [productDetails, setProductDetails] = useState(route?.params?.productData || null);
-  const [selectedColor, setSelectedColor] = useState(productDetails?.color ? productDetails?.color?.split(',')[0]:null)
+  const product = route?.params?.productData
+  const [productDetails, setProductDetails] = useState(product || null);
+  const [selectedColor, setSelectedColor] = useState(product?.color?.split(',')[0]|| null)
   const [RecommendedProductsData, setRecommendedProductsData] = useState([])
   const [liked, setLiked] = useState(false);
   const [qty, setQty] = useState(0)
   const [refresh, setRefresh] = useState(false)
   const {products} = useSelector((state => state.products))
-  console.log("data from redux bhai", products)
 
     const toggleLike = () => {
         setLiked(!liked);
@@ -57,7 +58,7 @@ export default function ProductDetails({route, navigation}){
     return (
         <View style={{marginLeft:3}}>
             <Text style={{ fontWeight: 500, fontSize: 20, marginTop: 20 }}>
-                {productDetails.brandname} {productDetails.productname} {productDetails.modelno}
+                {productDetails?.brandname} {productDetails?.productname} {productDetails?.modelno}
             </Text>
 
             <View style={{ flexDirection: 'row', marginTop: 10, flexWrap:'wrap' }}>
@@ -120,37 +121,40 @@ export default function ProductDetails({route, navigation}){
             </View>
 
             <View style={{ marginVertical: 10, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingHorizontal: 5 }}>
-                 <AddToCartButton item={productDetails}  qty={qty || 0} setQty={setQty} />
-                <MyButton bg='#12daa8' text="Buy Now" w={.4} />
+               <View style={{width:width*.4}}>  <AddToCartButton item={productDetails}  qty={qty || 0} setQty={setQty} /> </View>
+                <MyButton bg={primaryColor} text="Buy Now" w={.4} />
             </View>
 
         </View>
     )
 }
 
-  useEffect(() => {
-      setRefresh(!refresh) 
-      if(productDetails) 
-      fetchRecommendedProducts()
+useEffect(() => {
+  setProductDetails(product); // ✅ Update only when product changes
 
-      if(products && productDetails)
-        setQty(products[productDetails?.productid]?.qty)
-  }, [productDetails, products])
+  if (product) 
+      fetchRecommendedProducts(); // ✅ Call only if product exists
+
+  if (products && product)
+      setQty(products[product?.productid]?.qty); // ✅ Update qty only when needed
+
+}, [product, products]);
 
     return (
       <ScrollView  >
         <TouchableOpacity onPress={toggleLike} style={{alignSelf:'flex-end', marginRight:10, padding:5}}>
           <Icon name={liked ? "favorite" : "favorite-border"} size={20} color={liked ? "red" : "gray"} />
       </TouchableOpacity>
-     { productDetails?.picture &&  <View > <ProductImages images={productDetails?.picture ? productDetails.picture.split(',') : []} /> </View>  }
+     { productDetails?.picture &&  <View > <ProductImages images={product?.picture ? product.picture.split(',') : []} /> </View>  }
 
-   <View> {ProductDescription()} </View>
+     <ProductDescription />
 
       <View style={{width:width*.98, justifyContent:'center', marginTop:10, marginBottom:20 }}>
       <Text style={{fontSize:16, fontWeight:'bold', marginLeft:10, marginBottom:10}}>Recommended For You</Text>
-        <RecommendedProducts data={RecommendedProductsData} />
+        <RecommendedProducts data={RecommendedProductsData} setRefresh={setRefresh} />
       </View>
      
       </ScrollView>
+  
     )
 }

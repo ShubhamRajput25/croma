@@ -7,9 +7,16 @@ import ProductDetails from "../screen/ProductDetails";
 import Cart from "../screen/Cart";
 import Home from "../screen/Home";
 import MCI from "react-native-vector-icons/MaterialCommunityIcons";
+import LoginScreen from "../screen/LoginScreen";
+import OTPPage from "../screen/OTPPage";
+import SignupScreen from "../screen/SignupScreen";
+import SearchedProducts from "../screen/SearchedProducts";
+import ProductsByBrand from "../screen/ProductsByBrand";
+import ProductsByCategory from "../screen/ProductsByCategory";
 
 const Drawer = createDrawerNavigator()
 const Stack = createNativeStackNavigator()
+// const navigation = useNavigation()
 
 const RootNavigator = (props) => {
 
@@ -36,7 +43,7 @@ const RootNavigator = (props) => {
                 label="Settings"
                 icon={()=><MCI name={"account-settings"} size={24} />}
               />
-              <DrawerItem label="Logout"  icon={()=><MCI name={"logout"} size={24} />} />
+              {/* <DrawerItem label="Login"  icon={()=><MCI name={"login"} size={24} onPress={() => navigation?.navigate('login')} />} /> */}
             
           </DrawerContentScrollView>
 
@@ -62,6 +69,12 @@ const RootNavigator = (props) => {
             <Stack.Screen name="Mainscreen" component={projectDrawer} options={{header:MyHeader}} />
             <Stack.Screen component={ProductDetails}  name={"productdetails"}  options={{header:()=><MyHeader screen={'productdeatils'} />}}/> 
             <Stack.Screen component={Cart}  name={"cart"}   options={{header:()=><MyHeader screen={'cart'} />}}/> 
+            <Stack.Screen component={LoginScreen}  name={"login"} options={{headerShown:false}}  /> 
+            <Stack.Screen component={OTPPage}  name={"otp"} options={{headerShown:false}}  /> 
+            <Stack.Screen component={SignupScreen}  name={"signup"} options={{headerShown:false}}  /> 
+            <Stack.Screen component={SearchedProducts} name="searchedproducts" options={{header:() => <MyHeader screen="searchedproducts" />}} />
+            <Stack.Screen component={ProductsByBrand} name="productsbybrand" options={{header:() => <MyHeader screen="productsbybrand" />}} />
+            <Stack.Screen component={ProductsByCategory} name="productsbycategory" options={{header:() => <MyHeader screen="productsbycategory" />}} />
         </Stack.Navigator>
     </NavigationContainer>
 }

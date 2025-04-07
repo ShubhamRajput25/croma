@@ -1,6 +1,7 @@
 import axios from "axios"
 
-const serverurl = "http://192.168.29.247:5000"
+// const serverurl = "http://192.168.29.247:5000"
+const serverurl = "http://192.168.0.193:5000"
 
 const getData = async(url) => {
     try{

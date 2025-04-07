@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 5,
         marginTop: 10,
+        justifyContent:'center'
     },
     quantityContainer: {
         flexDirection: "row",
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
     text: {
         color: "#fff",
         fontWeight: "bold",
-        fontSize: 16,
+        fontSize: 12,
         paddingHorizontal: 10,
     },
 });
