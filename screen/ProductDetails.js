@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Text, View, Dimensions, ScrollView, Image, TouchableOpacity } from "react-native";
-import { getData, serverurl } from "../services/fetchNodeServices";
+import { getData, postData, serverurl } from "../services/fetchNodeServices";
 import ProductImages from "../components/ProductImages";
 const {width, height} = Dimensions.get('window')
 import EI from 'react-native-vector-icons/Entypo';
@@ -11,6 +11,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import AddToCartButton from "../components/AddToCartButton.js";
 import { useSelector } from "react-redux";
 import { primaryColor } from "../constants.js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProductDetails({route, navigation}){
   const product = route?.params?.productData
@@ -21,10 +22,35 @@ export default function ProductDetails({route, navigation}){
   const [qty, setQty] = useState(0)
   const [refresh, setRefresh] = useState(false)
   const {products} = useSelector((state => state.products))
+  const [WishListData, setWishListData] = useState([])
+  const [user, setUser] = useState(null)
 
-    const toggleLike = () => {
-        setLiked(!liked);
-    };
+  const fetchUserDeatils = async () => {
+    let tempUser = await AsyncStorage?.getItem('user')
+    setUser(JSON.parse(tempUser))
+}
+
+  const fetchWishListData = async () => {
+      let tempUser = await AsyncStorage?.getItem('user')
+      let user = JSON.parse(tempUser)
+      let result = await getData(`wishlist/fetch_wishlist/${user?.emailid}`)
+      setWishListData(result?.data || [])
+  }
+  const toggleLike = async() => {
+    try {
+        if (liked) {
+            // Unlike the product
+            await getData(`wishlist/remove_from_wishlist/${productDetails?.productid}`);
+        } else {
+            // Like the product
+            await postData(`wishlist/add_to_wishlist`, { productid: productDetails?.productid, userid: user?.emailid });
+        }
+        setLiked(!liked); // Toggle the liked state
+        setRefresh && setRefresh((prev) => !prev); // Refresh parent if needed
+    } catch (error) {
+        console.error("Error updating wishlist:", error);
+    }
+}
  
   const fetchRecommendedProducts = async () => {
     try {
@@ -81,15 +107,15 @@ export default function ProductDetails({route, navigation}){
             </View>
 
             <View style={{ margin: 2, paddingTop: 10 }}>
-                {productDetails.offerprice > 0 ?
+                {productDetails?.offerprice > 0 ?
                     <Text style={{fontSize: 20, fontWeight: 'bold' }}>
-                      <Text>&#8377;{productDetails.offerprice} </Text>
-                        <Text style={{ textDecorationLine: 'line-through', fontSize: 14, color:'red', fontWeight: 400 }}>&#8377;{productDetails.price}</Text>
+                      <Text>&#8377;{productDetails?.offerprice} </Text>
+                        <Text style={{ textDecorationLine: 'line-through', fontSize: 14, color:'red', fontWeight: 400 }}>&#8377;{productDetails?.price}</Text>
                         
                     </Text>
                     :
                     <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
-                        &#8377;{productDetails.price}
+                        &#8377;{productDetails?.price}
                     </Text>
                 }
                 <Text style={{ fontSize: 12,  }}>(Incl. all Taxes)</Text>
@@ -115,7 +141,7 @@ export default function ProductDetails({route, navigation}){
                 <View style={{ marginTop: '3%', paddingVertical: 5, paddingHorizontal: 5, width:width*.95 }}>
                     <RenderHTML tagsStyles={{ body: {  fontSize: 12, fontWeight: 500 } }}
                         contentWidth={width}
-                        source={{ html: productDetails.description }}
+                        source={{ html: productDetails?.description }}
                     />
                 </View>
             </View>
@@ -129,7 +155,15 @@ export default function ProductDetails({route, navigation}){
     )
 }
 
+const checkIsLiked = () => {
+    if (!WishListData || !productDetails) return;
+    const isLiked = WishListData.some((itm) => itm?.productid === productDetails?.productid);
+    console.log("isLiked", isLiked);
+    setLiked(isLiked);
+};
+
 useEffect(() => {
+    fetchWishListData()
   setProductDetails(product); // ✅ Update only when product changes
 
   if (product) 
@@ -138,7 +172,12 @@ useEffect(() => {
   if (products && product)
       setQty(products[product?.productid]?.qty); // ✅ Update qty only when needed
 
+    fetchUserDeatils()
 }, [product, products]);
+
+useEffect(() => {
+    checkIsLiked();
+}, [WishListData, productDetails]);
 
     return (
       <ScrollView  >
@@ -151,7 +190,7 @@ useEffect(() => {
 
       <View style={{width:width*.98, justifyContent:'center', marginTop:10, marginBottom:20 }}>
       <Text style={{fontSize:16, fontWeight:'bold', marginLeft:10, marginBottom:10}}>Recommended For You</Text>
-        <RecommendedProducts data={RecommendedProductsData} setRefresh={setRefresh} />
+        <RecommendedProducts data={RecommendedProductsData} setRefresh={setRefresh} wishlist={WishListData} />
       </View>
      
       </ScrollView>

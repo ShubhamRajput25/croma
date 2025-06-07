@@ -1,14 +1,26 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
-import { getData, serverurl } from "../services/fetchNodeServices";
+import { getData, postData, serverurl } from "../services/fetchNodeServices";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import {  useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const { width, height } = Dimensions.get("window");
-const ProductCart = ({ item, multiple=false, screen , setRefresh}) => {
-    const [liked, setLiked] = useState(false);
+const ProductCart = ({ item, multiple=false, screen , setRefresh, wishlist=[]}) => {
+    const [liked, setLiked] = useState();
     const [productDeatils, setProductDetails] = useState([]);
-    
+    const [user, setUser] = useState(null)
+
     const navigation = useNavigation()
+
+    const fetchUserDeatils = async () => {
+        let tempUser = await AsyncStorage?.getItem('user')
+        setUser(JSON.parse(tempUser))
+    }
+
+    const checkIsLiked = () => {
+        const isLiked = wishlist.some((itm) => itm?.productid === item?.productid);
+        setLiked(isLiked);
+    }
 
     const fetchProductDetails = async () => {   
         try {
@@ -24,10 +36,27 @@ const ProductCart = ({ item, multiple=false, screen , setRefresh}) => {
 
     useEffect(() => {
         fetchProductDetails()
+        fetchUserDeatils()
     }, [item?.productid])
 
-    const toggleLike = () => {
-        setLiked(!liked);
+    useEffect(() => {
+        checkIsLiked()
+    }, [wishlist, item])
+
+    const toggleLike = async() => {
+        try {
+            if (liked) {
+                // Unlike the product
+                await getData(`wishlist/remove_from_wishlist/${item?.productid}`);
+            } else {
+                // Like the product
+                await postData(`wishlist/add_to_wishlist`, { productid: item?.productid, userid: user?.emailid });
+            }
+            setLiked(!liked); // Toggle the liked state
+            setRefresh && setRefresh((prev) => !prev); // Refresh parent if needed
+        } catch (error) {
+            console.error("Error updating wishlist:", error);
+        }
     };
 
     return ( 
@@ -55,7 +84,9 @@ const ProductCart = ({ item, multiple=false, screen , setRefresh}) => {
         </View >
             <Text style={styles.brand}>{productDeatils?.brandname}</Text>
             <Text style={styles.name} numberOfLines={2}>{item.productname} {productDeatils?.modelno} {productDeatils?.color}</Text>
-            <Text style={styles.offerprice} numberOfLines={1}>&#8377;{productDeatils?.offerprice} <Text style={styles?.price}>&#8377;{productDeatils?.price}</Text> </Text>
+            <Text style={styles.offerprice} numberOfLines={1}>
+                &#8377;{productDeatils?.offerprice || "N/A"} <Text style={styles?.price}>&#8377;{productDeatils?.price || "N/A"}</Text>
+            </Text>
         </TouchableOpacity>
     );
 };

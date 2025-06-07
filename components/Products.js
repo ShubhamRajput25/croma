@@ -3,7 +3,7 @@ import { useState } from "react";
 import ProductCart from "./ProductCart";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-const Products = ({ data }) => {
+const Products = ({ data , wishlist=[]}) => {
     const [visibleCount, setVisibleCount] = useState(4);
     const [expanded, setExpanded] = useState(false);
 
@@ -11,13 +11,13 @@ const Products = ({ data }) => {
         setVisibleCount(expanded ? 4 : data?.length >= 8 ? 8 :data?.length); // Toggle full list
         setExpanded(!expanded);
     };
-
+ 
     return (
         <View>
             <FlatList 
                 data={data.slice(0, visibleCount)}
                 numColumns={2}
-                renderItem={({ item }) => <ProductCart item={item} />}
+                renderItem={({ item }) => <ProductCart multiple={true} item={item} wishlist={wishlist} />}
                 keyExtractor={(item) => item.brandid}
                 columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 10 }}
                 nestedScrollEnabled={true}

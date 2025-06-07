@@ -8,7 +8,7 @@ const ProductsByCategory = ({navigation, route}) => {
     const { categoryid } = route?.params || ''
     const [searchedProducts, setSearchedProducts] = useState([])
     const [loading, setLoading] = useState(false)
-    console.log("aaaaaaaaaaaaaaa: ", categoryid)
+    
     const fetchProducts = async () => {
         setLoading(true)
         try {

@@ -10,6 +10,7 @@ import Products from "../components/Products";
 import DealOfTheDay from "../components/DealOfTheDay";
 import OffersOnBanks from "../components/OffersOnBanks";
 import NewArrivalProducts from "../components/NewArrivalProducts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const { width, height } = Dimensions.get("window");
 
 export default function Home({navigation}){
@@ -18,10 +19,17 @@ export default function Home({navigation}){
     const [brandData, setBrandData] = useState([]);
     const [productData, setProductData] = useState([]);
     const [dealOfTheDayData, setDealOfTheDayData] = useState([]);
-    const [brandBanners, setBrandBanners] = useState([]);
+    const [brandBanners, setBrandBanners] = useState([]); 
     const [trendingProducts, setTrendingProducts] = useState([]);
     const [newArrivalProductData, setNewArrivalProductData] = useState([]);
+    const [WishListData, setWishListData] = useState([])
 
+    const fetchWishListData = async () => {
+        let tempUser = await AsyncStorage?.getItem('user')
+        let user = JSON.parse(tempUser)
+        let result = await getData(`wishlist/fetch_wishlist/${user?.emailid}`)
+        setWishListData(result?.data || [])
+    }
     const fetchAllBanners = async () => {
         try {
             const response = await getData(`banner/fetch_all_banner`)
@@ -32,7 +40,7 @@ export default function Home({navigation}){
         } catch (error) {
             console.error(error);
         }
-    }
+    } 
 
     const fetchAllCategory = async () => {
         try {
@@ -116,6 +124,7 @@ export default function Home({navigation}){
     }
 
     useEffect(() => {
+        fetchWishListData()
         fetchAllBanners()
         fetchAllCategory()
         fetchAllBrands()
@@ -134,6 +143,11 @@ export default function Home({navigation}){
             <HomeTopCarousel data={brandBanners} multipleImg={true} position={1} />
         </View>
 
+        <View style={{width:width, justifyContent:'center', marginTop:20, }}>
+        <Text style={{fontSize:14, fontWeight:'bold', marginLeft:2, marginBottom:5}} >No More Worrying About Your Appliances</Text>
+            <Image source={{uri:`${serverurl}/images/zipcare.webp`}} width={width*1} height={width/1.8} style={{resizeMode:'contain'}} />
+        </View>
+
         {/* category section */}
         <View style={{width:width, justifyContent:'center', marginTop:10 }}>
             <Text style={{fontSize:16, fontWeight:'bold', marginLeft:10, marginBottom:10}} >Categories</Text>
@@ -141,14 +155,16 @@ export default function Home({navigation}){
         </View>
 
         <View style={{width:width, justifyContent:'center', marginTop:20, }}>
-        <Text style={{fontSize:16, fontWeight:'bold', marginLeft:2, marginBottom:5}} >Experience Croma On Tata Neu!</Text>
+        <Text style={{fontSize:14, fontWeight:'bold', marginLeft:2, marginBottom:5}} >Experience Croma On Tata Neu!</Text>
             <Image source={{uri:`${serverurl}/images/tataneupostar.webp`}} width={width*1} height={width/1.9} style={{resizeMode:'contain'}} />
         </View>
+
+        
  
          {/* Deal of the day section */}
          <View style={{width:width, justifyContent:'center', marginTop:10 }}>
          <Text style={{fontSize:16, fontWeight:'bold', marginLeft:10, marginBottom:10}}>Deal Of The Day</Text>
-            <DealOfTheDay data={dealOfTheDayData} />
+            <DealOfTheDay data={dealOfTheDayData} wishlist={WishListData} />
         </View>
 
         {/* banners section */}
@@ -165,7 +181,7 @@ export default function Home({navigation}){
         {/* new arrival products section */}
         <View style={{width:width,justifyContent:'center', marginTop:10 }}>
         <Text style={{fontSize:16, fontWeight:'bold', marginLeft:15, marginBottom:10}}>New Arrival Products</Text>
-            <NewArrivalProducts data={newArrivalProductData}   />
+            <NewArrivalProducts data={newArrivalProductData} wishlist={WishListData}  />
         </View>
 
         {/* Brands section */}
@@ -177,13 +193,13 @@ export default function Home({navigation}){
          {/* Trending Products section */}
          <View style={{width:width, justifyContent:'center', marginTop:10 }}>
          <Text style={{fontSize:16, fontWeight:'bold', marginLeft:10, marginBottom:10}}>Trending Products</Text>
-            <DealOfTheDay data={trendingProducts} />
+            <DealOfTheDay data={trendingProducts} wishlist={WishListData} />
         </View>
 
         {/* Products section */}
         <View style={{width:width, justifyContent:'center', marginTop:10 }}>
             <Text style={{fontSize:16, fontWeight:'bold', marginLeft:10, marginBottom:10}}>Products</Text>
-            <Products data={productData} />
+            <Products data={productData}  wishlist={WishListData}/>
         </View>
         </ScrollView>
     )

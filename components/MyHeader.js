@@ -20,7 +20,7 @@ export default function MyHeader({screen='home'}){
         paddingBottom:5,
         width:width*.9
       }}>
-        <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())} style={{backgroundColor:'#fff', borderRadius:'50%', padding:5}}> <Icon name="bars" size={20} color="#000" /> </TouchableOpacity>
+      {screen == "home" &&  <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())} style={{backgroundColor:'#fff', borderRadius:'50%', padding:5}}> <Icon name="bars" size={20} color="#000" /> </TouchableOpacity>}
         <TouchableOpacity onPress={() => navigation.navigate('Mainscreen')}>
       <Image source={{uri:`${serverurl}/images/applogo.png`}}  style={{width:width*.3, height:height*.05}} />
       </TouchableOpacity>
